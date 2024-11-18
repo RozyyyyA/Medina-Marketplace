@@ -1,0 +1,80 @@
+<?php
+
+namespace App\Controllers;
+
+use App\Models\CustomerModel;
+use App\Models\ProductModel;
+use App\Models\CategoryModel;
+
+class AdminDashboardController extends BaseController
+{
+    public function index()
+    {
+        $customerModel = new CustomerModel();
+        $productModel = new ProductModel();
+        $categoryModel = new CategoryModel();
+
+        // Menghitung total pelanggan, produk, dan kategori
+        $totalCustomers = $customerModel->countAll();
+        $totalProducts = $productModel->countAll();
+        $totalCategories = $categoryModel->countAll();
+
+        // Kirim data ke view
+        return view('admin/dashboard', [
+            'totalCustomers' => $totalCustomers,
+            'totalProducts' => $totalProducts,
+            'totalCategories' => $totalCategories,
+        ]);
+    }
+
+    // Kelola data pelanggan
+    public function manageCustomers()
+    {
+        $customerModel = new CustomerModel();
+        $data['customers'] = $customerModel->findAll();
+        return view('admin/customers/index', $data);
+    }
+
+    public function deleteCustomer($id)
+    {
+        $customerModel = new CustomerModel();
+        $customerModel->delete($id);
+        return redirect()->to('/admin/customers')->with('message', 'Pelanggan berhasil dihapus');
+    }
+
+    // Kelola kategori
+    public function manageCategories()
+    {
+        $categoryModel = new CategoryModel();
+        $data['categories'] = $categoryModel->findAll();
+        return view('admin/categories/index', $data);
+    }
+
+    public function deleteCategory($id)
+    {
+        $categoryModel = new CategoryModel();
+
+        // Pastikan kategori yang akan dihapus ada
+        if ($categoryModel->find($id)) {
+            $categoryModel->delete($id);
+            return redirect()->to('/admin/categories')->with('message', 'Kategori berhasil dihapus');
+        } else {
+            return redirect()->to('/admin/categories')->with('error', 'Kategori tidak ditemukan');
+        }
+    }
+
+    // Kelola produk
+    public function manageProducts()
+    {
+        $productModel = new ProductModel();
+        $data['products'] = $productModel->findAll();
+        return view('admin/products/index', $data);
+    }
+
+    public function deleteProduct($id)
+    {
+        $productModel = new ProductModel();
+        $productModel->delete($id);
+        return redirect()->to('/admin/products')->with('message', 'Produk berhasil dihapus');
+    }
+}
